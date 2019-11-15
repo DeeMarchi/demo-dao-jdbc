@@ -9,11 +9,19 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class DepartmentDaoJDBC implements DepartmentDao {
 
     private Connection conn;
+
+    private Department instantiateDepartment(ResultSet set) throws SQLException {
+        Department department = new Department();
+        department.setId(set.getInt("Id"));
+        department.setName(set.getString("Name"));
+        return department;
+    }
 
     public DepartmentDaoJDBC(Connection conn) {
         this.conn = conn;
@@ -56,15 +64,28 @@ public class DepartmentDaoJDBC implements DepartmentDao {
         }
     }
 
-    private Department instantiateDepartment(ResultSet set) throws SQLException {
-        Department department = new Department();
-        department.setId(set.getInt("Id"));
-        department.setName(set.getString("Name"));
-        return department;
-    }
-
     @Override
     public List<Department> findAll() {
-        return null;
+        PreparedStatement statement = null;
+        ResultSet set= null;
+
+        try {
+            statement = conn.prepareStatement(
+                    "SELECT * FROM department "
+                        + "ORDER BY Name"
+            );
+            set = statement.executeQuery();
+
+            List<Department> list = new ArrayList<>();
+            while (set.next()) {
+                list.add(instantiateDepartment(set));
+            }
+            return list;
+        } catch (SQLException e) {
+            throw new DbException(e.getMessage());
+        } finally {
+            DB.closeStatement(statement);
+            DB.closeResultSet(set);
+        }
     }
 }
