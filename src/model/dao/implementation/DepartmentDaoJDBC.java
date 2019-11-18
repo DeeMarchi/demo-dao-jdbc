@@ -16,6 +16,10 @@ public class DepartmentDaoJDBC implements DepartmentDao {
 
     private Connection conn;
 
+    public DepartmentDaoJDBC(Connection conn) {
+        this.conn = conn;
+    }
+
     private Department instantiateDepartment(ResultSet set) throws SQLException {
         Department department = new Department();
         department.setId(set.getInt("Id"));
@@ -23,13 +27,37 @@ public class DepartmentDaoJDBC implements DepartmentDao {
         return department;
     }
 
-    public DepartmentDaoJDBC(Connection conn) {
-        this.conn = conn;
-    }
-
     @Override
     public void insert(Department obj) {
+        PreparedStatement statement = null;
 
+        try {
+            statement = conn.prepareStatement(
+                    "INSERT INTO department "
+                            + "(Name) "
+                            + "VALUES "
+                            + "(?)",
+                    statement.RETURN_GENERATED_KEYS
+            );
+            statement.setString(1, obj.getName());
+
+            int rowsAffected = statement.executeUpdate();
+
+            if (rowsAffected > 0) {
+                ResultSet set = statement.getGeneratedKeys();
+                if (set.next()) {
+                    int id = set.getInt(1);
+                    obj.setId(id);
+                }
+                DB.closeResultSet(set);
+            } else {
+                throw new DbException("Unexpected error! No rows affected!");
+            }
+        } catch (SQLException e) {
+            throw new DbException(e.getMessage());
+        } finally {
+            DB.closeStatement(statement);
+        }
     }
 
     @Override
