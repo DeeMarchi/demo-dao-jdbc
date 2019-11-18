@@ -26,5 +26,12 @@ public class DepartmentDaoTest {
         department = new Department(null, "Test");
         departmentDao.insert(department);
         System.out.println("Inserted! new id = " + department.getId());
+
+        System.out.println("\n=== TEST 4: department update ===");
+        department = new Department(1, "Art");
+        departmentDao.update(department);
+        System.out.println("Update completed");
+
+
     }
 }
