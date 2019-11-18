@@ -2,6 +2,7 @@ package model.dao.implementation;
 
 import db.DB;
 import db.DbException;
+import db.DbIntegrityException;
 import model.dao.SellerDao;
 import model.entities.Department;
 import model.entities.Seller;
@@ -109,7 +110,7 @@ public class SellerDaoJDBC implements SellerDao {
             statement.setInt(1, id);
 
             statement.executeUpdate();
-        } catch (SQLException e) {
+        } catch (SQLException | DbIntegrityException e) {
             throw new DbException(e.getMessage());
         } finally {
             DB.closeStatement(statement);
